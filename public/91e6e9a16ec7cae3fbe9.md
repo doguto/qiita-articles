@@ -1,11 +1,11 @@
 ---
-title: ZStringを読もう
+title: zstring-reading-0
 tags:
   - C#
   - OSS
 private: false
-updated_at: '2025-10-11T03:12:35+09:00'
-id: 17b9c550e88c53678403
+updated_at: '2025-10-11T03:07:06+09:00'
+id: 91e6e9a16ec7cae3fbe9
 organization_url_name: null
 slide: false
 ignorePublish: false
