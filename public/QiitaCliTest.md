@@ -1,8 +1,8 @@
 ---
 title: Qiita-Cli-Test
 tags:
-  - ''
-private: false
+  - 'GitHub'
+private: true
 updated_at: ''
 id: null
 organization_url_name: null
