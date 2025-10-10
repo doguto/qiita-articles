@@ -1,5 +1,5 @@
 ---
-title: zstring-reading-0
+title: ZStringを読もう
 tags:
   - 'C#'
   - 'OSS'
