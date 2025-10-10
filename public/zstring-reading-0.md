@@ -32,4 +32,4 @@ ZStringはC#のライブラリを沢山作成されているCySharp産のライ�
 1つの記事だけでは読み切れないため、PullRequest等の単位で記事を区切って読解していきたいと思います。
 以下がその記事のリストです。随時更新します。
 
-* 
+[ZStringを読もう(1)](https://qiita.com/kuto110/items/189cf89d26350fad800f)
