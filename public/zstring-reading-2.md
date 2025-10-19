@@ -4,8 +4,8 @@ tags:
   - C#
   - OSS
 private: false
-updated_at: ''
-id: null
+updated_at: '2025-10-19T23:45:08+09:00'
+id: 541846a10b9a72890744
 organization_url_name: null
 slide: false
 ignorePublish: false
