@@ -4,7 +4,7 @@ tags:
   - C#
   - OSS
 private: false
-updated_at: '2025-10-11T03:12:35+09:00'
+updated_at: '2025-10-19T23:54:48+09:00'
 id: 189cf89d26350fad800f
 organization_url_name: null
 slide: false
