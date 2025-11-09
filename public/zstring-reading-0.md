@@ -34,3 +34,4 @@ ZStringはC#のライブラリを沢山作成されているCySharp産のライ�
 
 [ZStringを読もう(1)](https://qiita.com/kuto110/items/189cf89d26350fad800f)
 [ZStringを読もう(2) initial commit](https://qiita.com/kuto110/items/541846a10b9a72890744)
+[ZStringを読もう(3) Utf16ValuesStringBuilder.cs 最初の34行](https://qiita.com/kuto110/items/dc057f1e23b7e0ec2b0f)
