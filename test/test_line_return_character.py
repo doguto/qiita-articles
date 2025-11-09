@@ -10,6 +10,6 @@ for i in range(10):
 print("Done!")  # Final output after the loop
 
 for i in range(10):
-    print(i, end='\r\n')  # No line ending, all numbers on the same line
+    print(i, end='\r\n')  # CRLF line ending, each number on a new line
 
 print("Done!")  # Final output after the loop
