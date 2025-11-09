@@ -1,5 +1,5 @@
 ---
-title: ZStringを読もう(3) Utf16ValuesStringBuilder
+title: ZStringを読もう(3) Utf16ValuesStringBuilder.cs 最初の34行
 tags:
   - C#
   - OSS
@@ -113,3 +113,179 @@ class Hoge
 ここまでヒープアロケーションを避けるとは徹底していますよね。僕だったらこれでアロケーションが発生するのは使用者のせいだし～と考えて何もしません。
 
 ちなみにここで使用されているref修飾子ですが、実はこれが本来の用途というわけではありません。詳しくは本筋とずれるため[こちらの記事](https://ufcpp.net/study/csharp/sp_ref.html)を見て欲しいですが、これは元は参照渡しのために実装された修飾子です。元々参照渡し用に実装されたものを`ref struct`の形で流用したんですね。
+
+### コンストラクタ
+
+まだ3行しか見ていないというのにこの分量です。知らないことが多すぎますね...。
+そんなことはさておき次の行を見ていきましょう。
+
+```cs
+delegate bool TryFormat<T>(T value, Span<char> destination, out int charsWritten, ReadOnlySpan<char> format);
+
+const int DefaultBufferSize = 32768; // use 32K default buffer.
+
+static char newLine1;
+static char newLine2;
+static bool crlf;
+```
+
+ふむ、これだけ見ても文脈が微妙ですね。一旦放置して次の行以降のコンストラクタを見てみましょう。
+
+
+```cs
+static Utf16ValueStringBuilder()
+{
+    var newLine = Environment.NewLine.ToCharArray();
+    if (newLine.Length == 1)
+    {
+        // cr or lf
+        newLine1 = newLine[0];
+        crlf = false;
+    }
+    else
+    {
+        // crlf(windows)
+        newLine1 = newLine[0];
+        newLine2 = newLine[1];
+        crlf = true;
+    }
+}
+```
+
+さてここまで見るとぼちぼち文脈が見えてきましたね。
+
+**改行コード**
+コンピューター上で扱う文字列にはいくつか特殊文字が存在します。特に有名なのが以下の改行コードでしょう。
+
+```cs
+"\n"
+```
+
+プログラミング上で文字列を扱う際にこの改行文字を入れると`Debug.Log()`などで改行が表現できることは皆さん知っていることかと思います。しかし実は改行コードというのはこれだけでは無く、他の特殊文字を使って改行を表現する場合もあります。
+それが以下の表現です。
+
+```cs
+"\r\n"
+```
+
+良く知る`\n`の前に`\r`という別の特殊文字が入れられていますね。
+この`\r`はキャリッジリターン(Carriage Return)と呼ばれていて、カーソルを行の先頭に移動させる、ということを示す特殊文字です。ちなみに`\n`はカーソルを一段下の行に移動するということを示すので、`\r\n`はカーソルを先頭に戻して次の行に移動するということを表していることになります。
+
+基本的にPCの改行コードは`\n`なのですが、改行の挙動をより正確に表しているという点でWindowsにおいては`\r\n`が改行コードに採用されていたりしています。
+WindowsユーザーはVScode等のエディタで右下を見ると基本的にCRLFという文字が見えると思いますが、この場合は改行コードとして`\r\n`が設定されています。LFになっている場合は`\n`が設定されています。
+
+<details><summary>改行コードの挙動（実験）</summary>
+
+先ほど改行コードの違いについて解説しましたが、実際挙動がどのように異なるのか簡単に実験してみました。
+なお使用言語はPythonです。
+
+```py
+# CR
+for i in range(10):
+    print(i, end='\r')  # Carriage return to overwrite the line
+
+print()
+print("Done!")  # Final output after the loop
+
+# LF
+for i in range(10):
+    print(i, end='\n')  # New line after each number
+
+print("Done!")  # Final output after the loop
+
+# CRLF
+for i in range(10):
+    print(i, end='\r\n')  # No line ending, all numbers on the same line
+
+print("Done!")  # Final output after the loop
+```
+
+このようにCR、LF、CRLFの3種類で0~9までの数字を単純にprintするコードで実験を行いました。
+結果として得られた出力は以下になります。
+
+```bash
+# CR
+9
+Done!
+
+# LF
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+Done!
+
+# CRLF
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+Done!
+```
+
+概ね予想通りの結果ですが、Windows環境で実験しているのでLFに関しては以下のようになるのかなと思っていました。
+
+```bash
+0
+ 1
+  2
+   3
+    4
+     5
+      6
+       7
+        8
+         9
+          Done!
+```
+
+実際は`\n`でもカーソルを先頭に戻しているみたいですね。LinuxやmacOSといった他のOSではLFが改行コードになっているので、合わせたのでしょうか。
+
+CRはちゃんと改行されず全ての数字が同じ行に書かれています。個人的には0~9の文字が重なって描画されるのかなと思っていたのですが、単純に文字が上書きされて最終的に9が描画されるみたいです（少し残念）。
+
+</details>
+
+さて長々と説明をしてしまいましたが、以上の知識を把握しておくとコンストラクタで行っている処理が見えます。
+↓再掲
+
+```cs
+static Utf16ValueStringBuilder()
+{
+    var newLine = Environment.NewLine.ToCharArray();
+    if (newLine.Length == 1)
+    {
+        // cr or lf
+        newLine1 = newLine[0];
+        crlf = false;
+    }
+    else
+    {
+        // crlf(windows)
+        newLine1 = newLine[0];
+        newLine2 = newLine[1];
+        crlf = true;
+    }
+}
+```
+
+ZStringではToString()を呼ぶまでcharの配列で一旦保存しておくことでヒープアロケーションを回避しているのですが、作成するStringに改行を入れたい場合があるかと思います。
+このときこの改行コードをchar配列に追加することで改行を表現するわけですが、その環境で改行をどう表すか、具体的にはLFなのかCRLFなのかによって特殊文字を`\n`の1文字入れれば良いのか`\r\n`の2文字入れるべきなのかが変わってきてしまいます。
+
+改行を追加するタイミングでどちらか判断しては効率が悪いため、この改行の扱いをどうするべきかをコンストラクタの段階で事前に判断しているということですね。
+
+## まとめ
+
+さて今回でUtf16ValueStringBuilder.csを見終われば良いなと思っていたのですが、思ったよりも長くなってしまいました。
+ということで今回はここまで。続きは次回書こうかなと思います。
